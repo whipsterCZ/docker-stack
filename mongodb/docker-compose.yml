@@ -1,0 +1,34 @@
+services:
+  mongo:
+    container_name: mongo
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - "./data/db:/data/db:delegated"
+      - "./data/configdb:/data/configdb:delegated"
+
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongo
+
+  mongo-metrics:
+    container_name: mongo-metrics
+    image: bitnami/mongodb-exporter:latest
+    command: --mongodb.uri=mongodb://root:mongo@mongo:27017/admin --disable.diagnosticdata --web.listen-address=":3100"
+    ports:
+      - 27310:3100
+    depends_on:
+      - mongo

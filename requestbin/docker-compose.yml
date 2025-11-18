@@ -1,0 +1,18 @@
+services:
+  redis:
+    container_name: requestbin-redis
+    image: redis:alpine
+    volumes:
+      - ./data/:/data:delegated
+  requestbin:
+    container_name: requestbin
+    image: crccheck/requestbin
+    # build: .
+    depends_on:
+      - redis
+    environment:
+      REDIS_URL: redis://requestbin-redis:6379/0
+      # SESSION_SECRET_KEY
+      # BUGSNAG_KEY
+    ports:
+      - "8000:80"

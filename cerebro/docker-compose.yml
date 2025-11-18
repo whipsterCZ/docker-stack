@@ -1,0 +1,6 @@
+version: '3'
+
+services:
+  cerebro:
+    container_name: cerebro
+    image:  yannart/cerebro:latest

@@ -1,0 +1,41 @@
+services:
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/data:/data
+    labels:
+      - "traefik.enable=true"
+      #- "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.loc`)"
+      #- "traefik.http.routers.portainer.rule=Host(`portainer.${PRIMARY_DOMAIN}`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      #- "traefik.http.routers.portainer.entrypoints=web,websecure"
+      #- "traefik.http.routers.portainer.tls.certresolver=myresolver"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+    restart: unless-stopped
+
+  traefik:
+    image: traefik:v3.6.1
+    container_name: traefik
+    #command: -c /dev/null --api --docker --docker.domain=loc --logLevel=DEBUG
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --api.dashboard=true
+    restart: unless-stopped
